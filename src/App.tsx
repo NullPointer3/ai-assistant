@@ -1,26 +1,31 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from 'react'
+import InputBox from './InputBox.tsx'
+import { fetchAIResponse } from './services/openaiClient.ts'
+import ConversationHistory from './ConversationHistory.tsx'
+import ResponseDisplay from './ResponseDisplay.tsx'
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+interface ConversationItem {
+  query: string
+  response: string
 }
 
-export default App;
+const App: React.FC = () => {
+  const [history, setHistory] = useState<ConversationItem[]>([])
+  const [latestResponse, setLatestResponse] = useState<string>('')
+
+  const handleQuerysubmit = async (query: string) => {
+    const response = await fetchAIResponse(query)
+    setLatestResponse(response)
+    setHistory([...history, { query, response}])
+  }
+  return (
+    <div>
+      <h1>AI-Powered Personal Assistant</h1>
+      <InputBox onSubmit={handleQuerysubmit}/>
+      <ResponseDisplay response={latestResponse}/>
+      <ConversationHistory history={history}/>
+    </div>
+  )
+}
+
+export default App
